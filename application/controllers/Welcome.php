@@ -153,6 +153,7 @@ class Welcome extends REST_Controller {
 	}
 	public function index_post()
     {
+		$this->load->helper(array("authorization","jwt"));
 		$data=json_decode(file_get_contents("php://input"));
 		$fname=$data->fname;
 		$lname=$data->lname;
@@ -160,12 +161,16 @@ class Welcome extends REST_Controller {
 		// 	"fname"=>$data->fname,
 		// 	"lname"=>$data->lname
 		// );
-        $get_data=$this->db->query("select * from tbl_student where fname='$fname' and lname='$lname'");
-		if($get_data->num_rows()>0)
+		
+        $get_data=$this->db->query("select * from tbl_student where fname='$fname' and lname='$lname'")->row();
+		$token=authorization::generateToken((array)$get_data);
+		if($get_data)
 		{
 			$message=array(
 				"message"=>"Login Successfully",
-				"status"=>1
+				"status"=>1,
+				"token"=>$token,
+				"data"=>$get_data
 			);
 		}
 		else{
